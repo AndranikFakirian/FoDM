@@ -28,37 +28,39 @@ double MLSin(double x, unsigned long n)
 int main()
 {
     cout.precision(1000);
-    double x;
-    double sum=0;
-    double sum1=0;
-    cin>>x;
-    for (unsigned long i=0; i<1000; i++) //Начиная где-то с i>1000 для x>=2 результат - nan
+    for (double x=1; x<10; x++)
     {
-        sum+=MLSin(x, i);
-        if (sum==sum1)
+        cout<<"x = "<<x/10<<endl;
+        double sum=0;
+        double sum1=0;
+        for (unsigned long i=0; i<1000; i++) //Начиная где-то с i>1000 для x>=2 результат - nan
         {
-            cout<<"Final iteration = "<<i-1<<endl;
-            break;
+            sum+=MLSin(x/10, i);
+            if (sum==sum1)
+            {
+                cout<<"Final iteration = "<<i-1<<endl;
+                break;
+            }
+            sum1=sum;
         }
-        sum1=sum;
-    }
-    cout<<"Experimental McLauren sin = "<<sum<<endl;
-    cout<<"Cmath sin = "<<sin(x)<<endl; //Область сходимости этого степенного ряда: lim {n->+inf} |Cn/Cn+1|=lim {n->+inf} |n+1|=+inf
-    Sleep(5000);
-    system("cls");
-    sum=0;
-    bool a=true;
-    for (unsigned long i=999; i>-1; i--)
-    {
-        sum+=MLSin(x, i);
-        if ((sum!=0)&&a)
+        cout<<"Experimental McLauren sin = "<<sum<<endl;
+        cout<<"Cmath sin = "<<sin(x/10)<<endl; //Область сходимости этого степенного ряда: lim {n->+inf} |Cn/Cn+1|=lim {n->+inf} |n+1|=+inf
+        Sleep(2000);
+        sum=0;
+        bool a=true;
+        for (unsigned long i=999; i>0; i--)
         {
-            cout<<"Initial iteration = "<<i<<endl;
-            a=!a;
+            sum+=MLSin(x/10, i-1);
+            if ((sum!=0)&&a)
+            {
+                cout<<"Initial iteration = "<<i-1<<endl;
+                a=!a;
+            }
         }
+        cout<<"Experimental McLauren sin = "<<sum<<endl;
+        cout<<"Cmath sin = "<<sin(x/10)<<endl;
+        Sleep(2000);
     }
-    cout<<"Experimental McLauren sin = "<<sum<<endl;
-    cout<<"Cmath sin = "<<sin(x)<<endl;
 
     return 0;
 }
