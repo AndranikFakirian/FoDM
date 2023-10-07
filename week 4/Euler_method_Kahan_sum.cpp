@@ -4,8 +4,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) //«аработало только после перемещени€ этих двух файлов в директорию: libgcc_s_dw2-1.dll libstdc++-6.dll
 {
-    double v0, v1, x0, x1, w0, dt, t;
-    t=0;
+    double v0, x0, w0, dt, t=0, xc=0, vc=0, xy=0, vy=0, xt=0, vt=0;
     long it;
     ifstream f1(argv[1], ios::in);
     f1>>w0;
@@ -18,11 +17,15 @@ int main(int argc, char* argv[]) //«аработало только после перемещени€ этих двух
     for (long i=0; i<it; i++)
     {
         f2<<x0<<' '<<v0<<' '<<v0*v0/2<<' '<<t<<endl;
-        x1=x0+dt*v0;
-        v1=v0+dt*(-w0*w0)*x0;
+        xy=dt*v0-xc;
+        vy=dt*(-w0*w0)*x0-vc;
+        xt=x0+xy;
+        vt=v0+vy;
+        xc=(xt-x0)-xy;
+        vc=(vt-v0)-vy;
         t+=dt;
-        x0=x1;
-        v0=v1;
+        x0=xt;
+        v0=vt;
     }
     f2.close();
 

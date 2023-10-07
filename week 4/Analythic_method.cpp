@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     double a=v0/w0;
     for (long i=1; i<=it; i++)
     {
-        f2<<x0<<' '<<v0<<' '<<(i-1)*dt<<endl;
+        f2<<x0<<' '<<v0<<' '<<v0*v0/2<<' '<<(i-1)*dt<<endl;
         x0=a*sin(w0*i*dt)+b*cos(w0*i*dt);
         v0=a*w0*cos(w0*i*dt)-b*w0*sin(w0*i*dt);
     }
