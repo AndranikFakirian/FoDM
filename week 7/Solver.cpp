@@ -11,7 +11,7 @@ protected:
     vector <float> station_derivative;
 public:
     System(vector <float> initial_state, vector <float> params, float dt): initial_state(initial_state), params(params), dt(dt) {};
-    virtual vector <float> f();
+    virtual vector <float> f()=0;
     vector <float> get_initial_state()
     {
         return initial_state;
@@ -31,7 +31,7 @@ public:
     Sin_oscillator(vector <float> initial_state, vector <float> params, float dt): System(initial_state, params, dt) {};
     vector <float> f()
     {
-        station_derivative={-pow(params[0], 2)*sin(initial_state[0]), initial_state[1]};
+        station_derivative={-pow(params[0], 2)*sin(initial_state[1]), initial_state[0]};
         return station_derivative;
     }
 };
@@ -53,7 +53,7 @@ public:
         this->dt=func.get_dt();
         state=func.get_initial_state();
         states.resize(state.size()+1);
-        iterations=int(T/dt);
+        iterations=int(T/dt)+2;
         for (auto &i: states)
         {
             i.resize(iterations);
@@ -99,7 +99,7 @@ int main()
     vector <float> state={0, 1};
     vector <float> params={1};
     float dt=0.1;
-    float T=10;
+    float T=1;
     Sin_oscillator s(state, params, dt);
     Euler_method <Sin_oscillator> E(s, T);
     vector <vector<float>> states=E.result();
