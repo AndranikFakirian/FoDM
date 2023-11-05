@@ -4,6 +4,67 @@
 #include <cmath>
 using namespace std;
 
+template <typename T>
+vector <T> operator +(vector <T> &a, vector <T> &b)
+{
+    bool t=true;
+    int N=0;
+    int N1=0;
+    if (a.size()>b.size())
+    {
+        N1=b.size();
+        N=a.size();
+    }
+    else
+    {
+        N=b.size();
+        N1=a.size();
+        t=!t;
+    }
+    vector <T> c;
+    for (int i=0; i<N; i++)
+    {
+        if (i>=N1)
+        {
+            if (t)
+            {
+                c.push_back(a[i]);
+            }
+            else
+            {
+                c.push_back(b[i]);
+            }
+        }
+        else
+        {
+            c.push_back(a[i]+b[i]);
+        }
+    }
+    return c;
+}
+
+template <typename Q, typename P>
+vector <Q> operator *(P k, vector <Q> a)
+{
+    vector <Q> b;
+    for (auto &i: a)
+    {
+        b.push_back(k*i);
+    }
+    return b;
+}
+
+template <typename Q, typename P>
+vector <Q> operator *(vector <Q> a, P k)
+{
+    vector <Q> b;
+    for (auto &i: a)
+    {
+        b.push_back(k*i);
+    }
+    return b;
+}
+
 class System {
 protected:
     vector <float> initial_state;
@@ -110,10 +171,8 @@ public:
     {
         Func func(this->state, this->params, this->dt);
         vector <float> temp=func.f();
-        for (int i=0; i<this->state.size(); i++)
-        {
-            this->state[i]+=temp[i]*this->dt;
-        }
+        temp=temp*this->dt;
+        this->state=this->state+temp;
     }
 };
 
@@ -127,18 +186,45 @@ public:
     {
         Func func1(this->state, this->params, this->dt);
         vector <float> temp1=func1.f();
-        vector <float> temp;
-        temp.resize(temp1.size());
-        for (int i=0; i<temp1.size(); i++)
-        {
-            temp[i]=this->state[i]+this->dt*temp1[i];
-        }
+        vector <float> temp=temp1*this->dt;
+        temp=temp+this->state;
         Func func(temp, this->params, this->dt);
         temp=func.f();
-        for (int i=0; i<this->state.size(); i++)
-        {
-            this->state[i]+=(temp1[i]+temp[i])*this->dt/2;
-        }
+        temp=temp+temp1;
+        temp=temp*(this->dt/2);
+        this->state=this->state+temp;
+    }
+};
+
+template <class Func>
+class RK4_method: public Method <Func>
+{
+public:
+    RK4_method (Func &func, float T): Method <Func>(func, T) {};
+    virtual ~RK4_method() {};
+    void step()
+    {
+        Func func1(this->state, this->params, this->dt);
+        vector <float> k1 = func1.f();
+        vector <float> k2 = k1*(this->dt/2);
+        k2=this->state+k2;
+        Func func2(k2, this->params, this->dt);
+        k2=func2.f();
+        vector <float> k3 = k2*(this->dt/2);
+        k3=this->state+k3;
+        Func func3(k3, this->params, this->dt);
+        k3=func3.f();
+        vector <float> k4 = k3*this->dt;
+        k4=this->state+k4;
+        Func func4(k4, this->params, this->dt);
+        k4=func4.f();
+        k2=k2*2;
+        k3=k3*2;
+        vector <float> k0 = k1+k2;
+        k0=k0+k3;
+        k0=k0+k4;
+        k0=k0*(this->dt/6);
+        this->state=this->state+k0;
     }
 };
 
@@ -172,11 +258,15 @@ int main(int argc, char* argv[])
     Euler_method <Low_vibration_oscillator> Elvo(lvo, T);
     Heun_method <Sin_oscillator> Hso(so, T);
     Heun_method <Low_vibration_oscillator> Hlvo(lvo, T);
+    RK4_method <Sin_oscillator> RK4so(so, T);
+    RK4_method <Low_vibration_oscillator> RK4lvo(lvo, T);
     vector <vector<vector<float>>> astates;
     astates.push_back(Eso.result());
     astates.push_back(Elvo.result());
     astates.push_back(Hso.result());
     astates.push_back(Hlvo.result());
+    astates.push_back(RK4so.result());
+    astates.push_back(RK4lvo.result());
     for (auto &i: astates)
     {
         for (auto &j: i)
