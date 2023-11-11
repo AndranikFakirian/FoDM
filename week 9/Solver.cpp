@@ -117,7 +117,7 @@ public:
     virtual ~LVO_with_dissipative_forces() {};
     vector <float> f()
     {
-        station_derivative={initial_state[1], -pow(params[0], 2)*initial_state[0]+params[1]*initial_state[1]};
+        station_derivative={initial_state[1], -pow(params[0], 2)*initial_state[0]-params[1]*initial_state[1]};
         return station_derivative;
     }
 };
@@ -263,21 +263,66 @@ int main(int argc, char* argv[])
     f1>>T;
     f1.close();
     ofstream f2(argv[2], ios::out);
-    Sin_oscillator so(initial_state, params, dt);
-    Low_vibration_oscillator lvo(initial_state, params, dt);
-    Euler_method <Sin_oscillator> Eso(so, T);
-    Euler_method <Low_vibration_oscillator> Elvo(lvo, T);
-    Heun_method <Sin_oscillator> Hso(so, T);
-    Heun_method <Low_vibration_oscillator> Hlvo(lvo, T);
-    RK4_method <Sin_oscillator> RK4so(so, T);
-    RK4_method <Low_vibration_oscillator> RK4lvo(lvo, T);
+    vector <vector<float>> states;
+    states.resize(initial_state.size()+1);
+    int iterations=int(T/dt)+1;
+    for (auto &i: states)
+    {
+        i.resize(iterations);
+    }
+    for (int i=0; i<iterations; i++)
+    {
+        states[0][i]=i*dt;
+    }
+    for (int i=1; i<states.size(); i++)
+    {
+        states[i][0]=initial_state[i-1];
+    }
+    float gamma=params[1]/2;
+    if (gamma<params[0])
+    {
+        float om = sqrt(pow(params[0], 2)-pow(gamma, 2));
+        float c1=initial_state[0];
+        float c2=(initial_state[1]+gamma*initial_state[0])/om;
+        for (int i=1; i<iterations; i++)
+        {
+            float t=states[0][i];
+            states[1][i]=exp(-gamma*t)*(c1*cos(om*t)+c2*sin(om*t));
+            states[2][i]=-gamma*states[1][i]+exp(-gamma*t)*om*(c2*cos(om*t)-c1*sin(om*t));
+        }
+    }
+    else if (gamma==params[0])
+    {
+        float c2=initial_state[0];
+        float c1=initial_state[1]+gamma*initial_state[0];
+        for (int i=1; i<iterations; i++)
+        {
+            float t=states[0][i];
+            states[1][i]=exp(-gamma*t)*(c1*t+c2);
+            states[2][i]=-gamma*states[1][i]+exp(-gamma*t)*c1;
+        }
+    }
+    else
+    {
+        float om = sqrt(pow(gamma, 2)-pow(params[0], 2));
+        float c1=(initial_state[1]+initial_state[0]*(gamma+om))/(2*om);
+        float c2=(initial_state[0]*(om-gamma)-initial_state[1])/(2*om);
+        for (int i=1; i<iterations; i++)
+        {
+            float t=states[0][i];
+            states[1][i]=exp(-gamma*t)*(c1*exp(om*t)+c2*exp(-om*t));
+            states[2][i]=-gamma*states[1][i]+exp(-gamma*t)*(c1*exp(om*t)-c2*exp(-om*t));
+        }
+    }
+    LVO_with_dissipative_forces LVOWDF(initial_state, params, dt);
+    Euler_method <LVO_with_dissipative_forces> Elvowdf(LVOWDF, T);
+    Heun_method <LVO_with_dissipative_forces> Hlvowdf(LVOWDF, T);
+    RK4_method <LVO_with_dissipative_forces> RK4lvowdf(LVOWDF, T);
     vector <vector<vector<float>>> astates;
-    astates.push_back(Eso.result());
-    astates.push_back(Elvo.result());
-    astates.push_back(Hso.result());
-    astates.push_back(Hlvo.result());
-    astates.push_back(RK4so.result());
-    astates.push_back(RK4lvo.result());
+    astates.push_back(Elvowdf.result());
+    astates.push_back(Hlvowdf.result());
+    astates.push_back(RK4lvowdf.result());
+    astates.push_back(states);
     for (auto &i: astates)
     {
         for (auto &j: i)
