@@ -3,23 +3,21 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 using namespace std;
-using json=nlohmann::json;
+
+template <typename T>
+int mean(T val)
+{
+    return (T(0)<val);
+}
 
 int main()
 {
-    ifstream f1("ttjs.json");
-    json js=json::parse(f1);
-    f1.close();
-    cout<<js["params"]<<endl;
-    vector <int> v = js["params"];
-    for (auto &i: v)
-    {
-        cout<<i<<' ';
-    }
-    js["SOX"]="YES!";
-    ofstream f2("ttjsc.json");
-    f2<<js.dump();
-    f2.close();
+    float a=1.2;
+    cout<<mean(a)<<endl;
+    a=0;
+    cout<<mean(a)<<endl;
+    a=-1.2;
+    cout<<mean(a)<<endl;
 
     return 0;
 }

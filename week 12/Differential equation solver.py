@@ -1,0 +1,10 @@
+import sympy as sp
+t=sp.symbols('t')
+x=sp.Function('x')
+F=sp.symbols('F')
+g=sp.symbols('g')
+w0=sp.symbols('w0')
+w=sp.symbols('w')
+E=sp.Eq(x(t).diff(t).diff(t)+2*g*x(t).diff(t)+w0**2*x(t), -w*F*sp.sin(w*t))
+solution=sp.dsolve(E)
+print(solution)
