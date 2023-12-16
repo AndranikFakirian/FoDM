@@ -30,3 +30,4 @@ for w in ws:
     ax.legend(loc=0)
     ax.set_title('w = {0}, w0 = {1}'.format(w, w0))
     plt.show()
+
