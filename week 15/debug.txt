@@ -1,0 +1,5 @@
+'''p = sub.Popen(["test.exe"], cwd=r"C:\Users\andra\Desktop\Informatics\Applied_physics\FoDM\week 15", shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
+pout, perr = p.communicate()
+print(p.returncode, pout, perr)
+pr = sub.run([r"C:\Users\andra\Desktop\Informatics\Applied_physics\FoDM\week 15\test.exe", Inp_f, Outp_f])
+print(pr.args, pr.returncode, pr.stdout, pr.stderr)'''
